@@ -106,7 +106,7 @@ class MWSClient
      *
      * @return array
      */
-    public function getCompetitivePricingForASIN(array $asinList = []): array
+    public function GetCompetitivePricingForASIN(array $asinList = []): array
     {
         if (count($asinList) > 20) {
             throw new Exception('Maximum amount of ASIN\'s for this call is 20');
@@ -147,7 +147,7 @@ class MWSClient
      *
      * @return array
      */
-    public function getCompetitivePricingForSKU(array $skuList = []): array
+    public function GetCompetitivePricingForSKU(array $skuList = []): array
     {
         if (count($skuList) > 20) {
             throw new Exception('Maximum amount of SKU\'s for this call is 20');
@@ -194,7 +194,7 @@ class MWSClient
      *
      * @return array
      */
-    public function getLowestPricedOffersForASIN(string $asin, string $ItemCondition = 'New'): array
+    public function GetLowestPricedOffersForASIN(string $asin, string $ItemCondition = 'New'): array
     {
         return $this->request('GetLowestPricedOffersForASIN', [
             'ASIN' => $asin,
@@ -210,7 +210,7 @@ class MWSClient
      *
      * @return array
      */
-    public function getMyPriceForSKU(array $skuList = [], string $ItemCondition = ''): array
+    public function GetMyPriceForSKU(array $skuList = [], string $ItemCondition = ''): array
     {
         if (count($skuList) > 20) {
             throw new Exception('Maximum amount of SKU\'s for this call is 20');
@@ -259,7 +259,7 @@ class MWSClient
      *
      * @return array
      */
-    public function getMyPriceForASIN(array $asinList = [], string $ItemCondition = ''): array
+    public function GetMyPriceForASIN(array $asinList = [], string $ItemCondition = ''): array
     {
         if (count($asinList) > 20) {
             throw new Exception('Maximum amount of SKU\'s for this call is 20');
@@ -307,7 +307,7 @@ class MWSClient
      *
      * @return array
      */
-    public function getLowestOfferListingsForASIN(array $asinList = [], string $ItemCondition = ''): array
+    public function GetLowestOfferListingsForASIN(array $asinList = [], string $ItemCondition = ''): array
     {
         if (count($asinList) > 20) {
             throw new Exception('Maximum amount of ASIN\'s for this call is 20');
@@ -440,7 +440,7 @@ class MWSClient
      *
      * @return ?array if the order is found, null if not
      */
-    public function getOrder(string $AmazonOrderId): ?array
+    public function GetOrder(string $AmazonOrderId): ?array
     {
         $response = $this->request('GetOrder', ['AmazonOrderId.Id.1' => $AmazonOrderId]);
 
@@ -469,7 +469,7 @@ class MWSClient
      *
      * @return ?array if found, null if not found
      */
-    public function getProductCategoriesForSKU(string $SellerSKU): ?array
+    public function GetProductCategoriesForSKU(string $SellerSKU): ?array
     {
         $result = $this->request('GetProductCategoriesForSKU', ['SellerSKU' => $SellerSKU]);
 
@@ -483,7 +483,7 @@ class MWSClient
      *
      * @return ?array if found, null if not found
      */
-    public function getProductCategoriesForASIN(string $ASIN): ?array
+    public function GetProductCategoriesForASIN(string $ASIN): ?array
     {
         $result = $this->request('GetProductCategoriesForASIN', ['ASIN' => $ASIN]);
 
@@ -498,7 +498,7 @@ class MWSClient
      *
      * @return array
      */
-    public function getMatchingProductForId(array $asinList, string $type = 'ASIN'): array
+    public function GetMatchingProductForId(array $asinList, string $type = 'ASIN'): array
     {
         $asinList = array_unique($asinList);
 
@@ -656,7 +656,7 @@ class MWSClient
      *
      * @return array
      */
-    public function getReportList(array $ReportTypeList = []): array
+    public function GetReportList(array $ReportTypeList = []): array
     {
         $query = [];
         $counter = 1;
@@ -722,7 +722,7 @@ class MWSClient
             ];
         }
 
-        return $this->submitFeed('_POST_PRODUCT_DATA_', $feed);
+        return $this->SubmitFeed('_POST_PRODUCT_DATA_', $feed);
     }
 
     /**
@@ -750,7 +750,7 @@ class MWSClient
             ];
         }
 
-        return $this->submitFeed('_POST_INVENTORY_AVAILABILITY_DATA_', $feed);
+        return $this->SubmitFeed('_POST_INVENTORY_AVAILABILITY_DATA_', $feed);
     }
 
     /**
@@ -779,7 +779,7 @@ class MWSClient
             ];
         }
 
-        return $this->submitFeed('_POST_INVENTORY_AVAILABILITY_DATA_', $feed);
+        return $this->SubmitFeed('_POST_INVENTORY_AVAILABILITY_DATA_', $feed);
     }
 
     /**
@@ -831,7 +831,7 @@ class MWSClient
             ];
         }
 
-        return $this->submitFeed('_POST_PRODUCT_PRICING_DATA_', $feed);
+        return $this->SubmitFeed('_POST_PRODUCT_PRICING_DATA_', $feed);
     }
 
     /**
@@ -871,7 +871,7 @@ class MWSClient
             $csv->insertOne(array_values($product->toArray()));
         }
 
-        return $this->submitFeed('_POST_FLAT_FILE_LISTINGS_DATA_', $csv);
+        return $this->SubmitFeed('_POST_FLAT_FILE_LISTINGS_DATA_', $csv);
     }
 
     /**
@@ -881,7 +881,7 @@ class MWSClient
      *
      * @return array
      */
-    public function getFeedSubmissionResult(string $FeedSubmissionId): array
+    public function GetFeedSubmissionResult(string $FeedSubmissionId): array
     {
         $result = $this->request('GetFeedSubmissionResult', ['FeedSubmissionId' => $FeedSubmissionId]);
 
@@ -893,7 +893,7 @@ class MWSClient
      *
      * @return array
      */
-    public function getFeedSubmissionList(): array
+    public function GetFeedSubmissionList(): array
     {
         $result = $this->request('GetFeedSubmissionList');
 
@@ -1011,7 +1011,7 @@ class MWSClient
      *
      * @return array on succes
      */
-    public function getReport(string $ReportId): ?array
+    public function GetReport(string $ReportId): ?array
     {
         $status = $this->getReportRequestStatus($ReportId);
 
@@ -1051,7 +1051,7 @@ class MWSClient
      *
      * @return array if the report is found
      */
-    public function getReportRequestStatus(string $ReportId): ?array
+    public function GetReportRequestList(string $ReportId): ?array
     {
         $result = $this->request('GetReportRequestList', ['ReportRequestIdList.Id.1' => $ReportId]);
 
