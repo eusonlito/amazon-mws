@@ -1,6 +1,6 @@
 <?php declare (strict_types = 1);
 
-namespace AmazonMws;
+namespace AmazonMWS;
 
 use Exception;
 
@@ -155,6 +155,13 @@ class EndPoint
         ],
     ];
 
+    /**
+     * @param string $key
+     *
+     * @throws \Exception
+     *
+     * @return array
+     */
     public static function get(string $key): array
     {
         if (empty(static::$endpoints[$key])) {

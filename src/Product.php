@@ -1,36 +1,80 @@
 <?php declare (strict_types = 1);
 
-namespace AmazonMws;
+namespace AmazonMWS;
 
 class Product
 {
+    /**
+     * @var string
+     */
     public $sku;
-    public $price;
+
+    /**
+     * @var float
+     */
+    public $price = 0.0;
+
+    /**
+     * @var int
+     */
     public $quantity = 0;
+
+    /**
+     * @var string
+     */
     public $product_id;
+
+    /**
+     * @var string
+     */
     public $product_id_type;
+
+    /**
+     * @var string
+     */
     public $condition_type = 'New';
+
+    /**
+     * @var string
+     */
     public $condition_note;
 
+    /**
+     * @var array
+     */
     private $errors = [];
 
+    /**
+     * @var array
+     */
     private $conditions = [
         'New', 'Refurbished', 'UsedLikeNew',
         'UsedVeryGood', 'UsedGood', 'UsedAcceptable',
     ];
 
-    public function __construct(array $array = [])
+    /**
+     * @param array $data = []
+     *
+     * @return self
+     */
+    public function __construct(array $data = [])
     {
-        foreach ($array as $key => $value) {
+        foreach ($data as $key => $value) {
             $this->$key = $value;
         }
     }
 
+    /**
+     * @return array
+     */
     public function getErrors(): array
     {
         return $this->errors;
     }
 
+    /**
+     * @return array
+     */
     public function toArray(): array
     {
         return [
@@ -44,6 +88,9 @@ class Product
         ];
     }
 
+    /**
+     * @return bool
+     */
     public function validate(): bool
     {
         if ((mb_strlen($this->sku) < 1) || (strlen($this->sku) > 40)) {
@@ -107,9 +154,15 @@ class Product
             }
         }
 
-        return (bool)$this->errors;
+        return (bool) $this->errors;
     }
 
+    /**
+     * @param string $property
+     * @param mixed $value
+     *
+     * @return mixed
+     */
     public function __set(string $property, $value)
     {
         if (property_exists($this, $property)) {

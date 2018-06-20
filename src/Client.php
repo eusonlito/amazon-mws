@@ -1,28 +1,27 @@
-<?php declare(strict_types=1);
+<?php declare (strict_types = 1);
 
-namespace AmazonMws;
+namespace AmazonMWS;
 
 use DateTime;
 use Exception;
 use SplTempFileObject;
-use League\Csv\Reader;
-use League\Csv\Writer;
-use Spatie\ArrayToXml\ArrayToXml;
 
 class Client
 {
+    /**
+     * @var array
+     */
+    protected $languages = ['de-DE', 'en-EN', 'es-ES', 'fr-FR', 'it-IT', 'en-US'];
+
     /**
      * @var bool
      */
     protected $debugNextFeed = false;
 
     /**
-     * @var \GuzzleHttp\Client
-     */
-    protected $client = null;
-
-    /**
      * @param array $config
+     *
+     * @return self
      */
     public function __construct(array $config)
     {
@@ -31,8 +30,10 @@ class Client
 
     /**
      * Call this method to get the raw feed instead of sending it
+     *
+     * @return void
      */
-    public function debugNextFeed()
+    public function debugNextFeed(): void
     {
         $this->debugNextFeed = true;
     }
@@ -52,6 +53,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/products/Products_GetCompetitivePricingForASIN.html
+     *
      * Returns the current competitive price of a product, based on ASIN.
      *
      * @param array $asinList = []
@@ -65,7 +68,7 @@ class Client
         }
 
         $counter = 1;
-        $query = [];
+        $query = ['MarketplaceId.Id.1' => false];
 
         foreach ($asinList as $key) {
             $query['ASINList.ASIN.'.($counter++)] = $key;
@@ -91,6 +94,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/products/Products_GetCompetitivePricingForSKU.html
+     *
      * Returns the current competitive price of a product, based on SKU.
      *
      * @param array $skuList = []
@@ -104,7 +109,7 @@ class Client
         }
 
         $counter = 1;
-        $query = [];
+        $query = ['MarketplaceId.Id.1' => false];
 
         foreach ($skuList as $key) {
             $query['SellerSKUList.SellerSKU.'.($counter++)] = $key;
@@ -135,6 +140,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/products/Products_GetLowestPricedOffersForASIN.html
+     *
      * Returns lowest priced offers for a single product, based on ASIN.
      *
      * @param string $asin
@@ -151,6 +158,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/products/Products_GetMyPriceForSKU.html
+     *
      * Returns pricing information for your own offer listings, based on SKU.
      *
      * @param array  $skuList = []
@@ -165,7 +174,7 @@ class Client
         }
 
         $counter = 1;
-        $query = [];
+        $query = ['MarketplaceId.Id.1' => false];
 
         if ($ItemCondition) {
             $query['ItemCondition'] = $ItemCondition;
@@ -198,6 +207,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/products/Products_GetMyPriceForASIN.html
+     *
      * Returns pricing information for your own offer listings, based on ASIN.
      *
      * @param array $asinList = []
@@ -212,7 +223,7 @@ class Client
         }
 
         $counter = 1;
-        $query = [];
+        $query = ['MarketplaceId.Id.1' => false];
 
         if ($ItemCondition) {
             $query['ItemCondition'] = $ItemCondition;
@@ -244,6 +255,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/products/Products_GetLowestOfferListingsForASIN.html
+     *
      * Returns pricing information for the lowest-price active offer listings for up to 20 products, based on ASIN.
      *
      * @param array $asinList = [] array of ASIN values
@@ -258,7 +271,7 @@ class Client
         }
 
         $counter = 1;
-        $query = [];
+        $query = ['MarketplaceId.Id.1' => false];
 
         if ($ItemCondition) {
             $query['ItemCondition'] = $ItemCondition;
@@ -285,6 +298,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/orders-2013-09-01/Orders_ListOrders.html
+     *
      * Returns orders created or updated during a time frame that you specify.
      *
      * @param object DateTime $from, beginning of time frame
@@ -302,7 +317,10 @@ class Client
         array $fulfillmentChannels = ['MFN'],
         DateTime $till = null
     ): array {
-        $query = ['CreatedAfter' => gmdate(Constant::DATE_FORMAT, $from->getTimestamp())];
+        $query = [
+            'MarketplaceId' => false,
+            'CreatedAfter' => gmdate(Constant::DATE_FORMAT, $from->getTimestamp()),
+        ];
 
         if ($till) {
             $query['CreatedBefore'] = gmdate(Constant::DATE_FORMAT, $till->getTimestamp());
@@ -347,6 +365,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/orders-2013-09-01/Orders_ListOrderItemsByNextToken.html
+     *
      * Returns orders created or updated during a time frame that you specify.
      *
      * @param string $nextToken
@@ -372,6 +392,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/orders-2013-09-01/Orders_GetOrder.html
+     *
      * Returns an order based on the AmazonOrderId values that you specify.
      *
      * @param string $AmazonOrderId
@@ -386,6 +408,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/orders-2013-09-01/Orders_ListOrderItems.html
+     *
      * Returns order items based on the AmazonOrderId that you specify.
      *
      * @param string $AmazonOrderId
@@ -395,12 +419,15 @@ class Client
     public function ListOrderItems(string $AmazonOrderId): array
     {
         $response = $this->request('ListOrderItems', ['AmazonOrderId' => $AmazonOrderId]);
+
         $result = array_values($response['OrderItems']);
 
         return isset($result[0]['QuantityOrdered']) ? $result : $result[0];
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/products/Products_GetProductCategoriesForSKU.html
+     *
      * Returns the parent product categories that a product belongs to, based on SellerSKU.
      *
      * @param string $SellerSKU
@@ -409,10 +436,15 @@ class Client
      */
     public function GetProductCategoriesForSKU(string $SellerSKU): ?array
     {
-        return $this->request('GetProductCategoriesForSKU', ['SellerSKU' => $SellerSKU])['Self'] ?? null;
+        return $this->request('GetProductCategoriesForSKU', [
+            'MarketplaceId.Id.1' => false,
+            'SellerSKU' => $SellerSKU,
+        ])['Self'] ?? null;
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/products/Products_GetProductCategoriesForASIN.html
+     *
      * Returns the parent product categories that a product belongs to, based on ASIN.
      *
      * @param string $ASIN
@@ -421,10 +453,15 @@ class Client
      */
     public function GetProductCategoriesForASIN(string $ASIN): ?array
     {
-        return $this->request('GetProductCategoriesForASIN', ['ASIN' => $ASIN])['Self'] ?? null;
+        return $this->request('GetProductCategoriesForASIN', [
+            'MarketplaceId.Id.1' => false,
+            'ASIN' => $ASIN,
+        ])['Self'] ?? null;
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/products/Products_GetMatchingProductForId.html
+     *
      * Returns a list of products and their attributes, based on a list of ASIN, GCID, SellerSKU, UPC, EAN, ISBN, and JAN values.
      *
      * @param array $asinList A list of id's
@@ -441,24 +478,19 @@ class Client
         }
 
         $counter = 1;
-        $query = ['IdType' => $type];
+        $query = [
+            'MarketplaceId.Id.1' => false,
+            'IdType' => $type,
+        ];
 
         foreach ($asinList as $asin) {
             $query['IdList.Id.'.($counter++)] = $asin;
         }
 
         $response = $this->request('GetMatchingProductForId', $query, null, true);
+        $response = $this->replaceLanguages($response);
 
-        $languages = ['de-DE', 'en-EN', 'es-ES', 'fr-FR', 'it-IT', 'en-US'];
-        $replace = ['</ns2:ItemAttributes>' => '</ItemAttributes>'];
-
-        foreach ($languages as $language) {
-            $replace['<ns2:ItemAttributes xml:lang="'.$language.'">'] = '<ItemAttributes><Language>'.$language.'</Language>';
-        }
-
-        $replace['ns2:'] = '';
-
-        $response = $this->xmlToArray(strtr($response, $replace))['GetMatchingProductForIdResult'] ?? [];
+        $response = Xml::toArray($response)['GetMatchingProductForIdResult'] ?? [];
 
         $result = [
             'found' => [],
@@ -473,18 +505,18 @@ class Client
             $response = [$response];
         }
 
-        foreach ($response as $result) {
-            $asin = $result['@attributes']['Id'];
+        foreach ($response as $item) {
+            $asin = $item['@attributes']['Id'];
 
-            if ($result['@attributes']['status'] !== 'Success') {
+            if ($item['@attributes']['status'] !== 'Success') {
                 $result['not_found'][] = $asin;
                 continue;
             }
 
-            if (isset($result['Products']['Product']['AttributeSets'])) {
-                $products[0] = $result['Products']['Product'];
+            if (isset($item['Products']['Product']['AttributeSets'])) {
+                $products[0] = $item['Products']['Product'];
             } else {
-                $products = $result['Products']['Product'];
+                $products = $item['Products']['Product'];
             }
 
             foreach ($products as $product) {
@@ -543,6 +575,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/products/Products_ListMatchingProducts.html
+     *
      * Returns a list of products and their attributes, ordered by relevancy, based on a search query that you specify.
      *
      * @param string $query the open text query
@@ -557,25 +591,20 @@ class Client
         }
 
         $query = [
+            'MarketplaceId.Id.1' => false,
             'Query' => urlencode($search),
             'QueryContextId' => $searchContextId,
         ];
 
         $response = $this->request('ListMatchingProducts', $query, null, true);
+        $response = $this->replaceLanguages($response);
 
-        $languages = ['de-DE', 'en-EN', 'es-ES', 'fr-FR', 'it-IT', 'en-US'];
-        $replace = ['</ns2:ItemAttributes>' => '</ItemAttributes>'];
-
-        foreach ($languages as $language) {
-            $replace['<ns2:ItemAttributes xml:lang="'.$language.'">'] = '<ItemAttributes><Language>'.$language.'</Language>';
-        }
-
-        $replace['ns2:'] = '';
-
-        return $this->xmlToArray(strtr($response, $replace))['ListMatchingProductsResult'] ?? [];
+        return Xml::toArray($response)['ListMatchingProductsResult'] ?? [];
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/reports/Reports_GetReportList.html
+     *
      * Returns a list of reports that were created in the previous 90 days.
      *
      * @param array $ReportTypeList = []
@@ -595,6 +624,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/recommendations/Recommendations_ListRecommendations.html
+     *
      * Returns your active recommendations for a specific category or for all categories for a specific marketplace.
      *
      * @param string $recommendationCategory = [] - One of: Inventory, Selection, Pricing, Fulfillment, ListingQuality, GlobalSelling, Advertising
@@ -613,6 +644,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/sellers/Sellers_ListMarketplaceParticipations.html
+     *
      * Returns a list of marketplaces that the seller submitting the request can sell in, and a list of participations that include seller-specific information in that marketplace
      *
      * @return array
@@ -648,6 +681,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/feeds/Feeds_SubmitFeed.html
+     *
      * Update a product's stock quantity
      *
      * @param array $array array containing sku as key and quantity as value
@@ -676,6 +711,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/feeds/Feeds_SubmitFeed.html
+     *
      * Update a product's stock quantity
      *
      * @param array $array array containing arrays with next keys: [sku, quantity, latency]
@@ -705,6 +742,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/feeds/Feeds_SubmitFeed.html
+     *
      * Update a product's price
      * Dates in DateTime object
      * Price has to be formatted as XSD Numeric Data Type (http://www.w3schools.com/xml/schema_dtypes_numeric.asp)
@@ -748,7 +787,7 @@ class Client
                     '_value' => strval($price['SalePrice']),
                     '_attributes' => [
                         'currency' => 'DEFAULT',
-                    ]
+                    ],
                 ],
             ];
         }
@@ -757,6 +796,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/feeds/Feeds_SubmitFeed.html
+     *
      * Post to create or update a product (_POST_FLAT_FILE_LISTINGS_DATA_)
      *
      * @param object|array $MWSProducts - MWSProduct or array of MWSProduct objects
@@ -797,6 +838,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/feeds/Feeds_GetFeedSubmissionResult.html
+     *
      * Returns the feed processing report and the Content-MD5 header.
      *
      * @param string $FeedSubmissionId
@@ -811,6 +854,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/feeds/Feeds_GetFeedSubmissionList.html
+     *
      * Returns a list of all feed submissions submitted in the previous 90 days.
      *
      * @return array
@@ -823,6 +868,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/feeds/Feeds_SubmitFeed.html
+     *
      * Uploads a feed for processing by Amazon MWS.
      *
      * @param string $FeedType (http://docs.developer.amazonservices.com/en_US/feeds/Feeds_FeedType.html)
@@ -834,7 +881,7 @@ class Client
     public function SubmitFeed(string $FeedType, $feedContent, bool $debug = false, array $options = []): array
     {
         if (is_array($feedContent)) {
-            $feedContent = $this->arrayToXml(array_merge([
+            $feedContent = Xml::toXml(array_merge([
                 'Header' => [
                     'DocumentVersion' => 1.01,
                     'MerchantIdentifier' => Config::get('Seller_Id'),
@@ -859,7 +906,6 @@ class Client
             'PurgeAndReplace' => ($purgeAndReplace ? 'true' : 'false'),
             'Merchant' => Config::get('Seller_Id'),
             'MarketplaceId.Id.1' => false,
-            'MarketplaceIdList.Id.1' => Config::get('Marketplace_Id'),
             'SellerId' => false,
         ];
 
@@ -867,31 +913,8 @@ class Client
     }
 
     /**
-     * Convert an array to xml
+     * https://docs.developer.amazonservices.com/en_US/reports/Reports_RequestReport.html
      *
-     * @param array $array to convert
-     * @param string $customRoot = 'AmazonEnvelope'
-     *
-     * @return string
-     */
-    protected function arrayToXml(array $array, string $customRoot = 'AmazonEnvelope'): string
-    {
-        return ArrayToXml::convert($array, $customRoot);
-    }
-
-    /**
-     * Convert an xml string to an array
-     *
-     * @param string $xml
-     *
-     * @return array
-     */
-    protected function xmlToArray(string $xml): array
-    {
-        return json_decode(json_encode(simplexml_load_string($xml)), true);
-    }
-
-    /**
      * Creates a report request and submits the request to Amazon MWS.
      *
      * @param string $report (http://docs.developer.amazonservices.com/en_US/reports/Reports_ReportType.html)
@@ -902,10 +925,7 @@ class Client
      */
     public function RequestReport(string $report, DateTime $StartDate = null, DateTime $EndDate = null): string
     {
-        $query = [
-            'MarketplaceIdList.Id.1' => Config::get('Marketplace_Id'),
-            'ReportType' => $report,
-        ];
+        $query = ['ReportType' => $report];
 
         if ($StartDate) {
             $query['StartDate'] = gmdate(Constant::DATE_FORMAT, $StartDate->getTimestamp());
@@ -925,6 +945,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/reports/Reports_GetReport.html
+     *
      * Get a report's content
      *
      * @param string $ReportId
@@ -965,6 +987,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/reports/Reports_GetReportRequestList.html
+     *
      * Get a report's processing status
      *
      * @param string  $ReportId
@@ -979,6 +1003,8 @@ class Client
     }
 
     /**
+     * https://docs.developer.amazonservices.com/en_US/fba_inventory/FBAInventory_ListInventorySupply.html
+     *
      * Get a list's inventory for Amazon's fulfillment
      *
      * @param array $skuList = []
@@ -1008,16 +1034,34 @@ class Client
     /**
      * Request MWS
      *
-     * @param string $endPoint
+     * @param string $endpoint
      * @param array $query = []
      * @param string $body = null
      * @param bool $raw = false
      *
      * @return mixed
      */
-    protected function request(string $endPoint, array $query = [], string $body = null, bool $raw = false)
+    protected function request(string $endpoint, array $query = [], string $body = null, bool $raw = false)
     {
-        return Request::request($endPoint, $query, $body, $raw);
+        return Request::request($endpoint, $query, $body, $raw);
+    }
+
+    /**
+     * @param string $response
+     *
+     * @return string
+     */
+    protected function replaceLanguages(string $response): string
+    {
+        $replace = ['</ns2:ItemAttributes>' => '</ItemAttributes>'];
+
+        foreach ($this->languages as $language) {
+            $replace['<ns2:ItemAttributes xml:lang="'.$language.'">'] = '<ItemAttributes><Language>'.$language.'</Language>';
+        }
+
+        $replace['ns2:'] = '';
+
+        return strtr($response, $replace);
     }
 
     /**
@@ -1028,15 +1072,5 @@ class Client
     protected function responseByKeys(array $response): array
     {
         return (array_keys($response) === range(0, count($response) - 1)) ? $response : [$response];
-    }
-
-    /**
-     * @param \GuzzleHttp\Client $client
-     *
-     * @return void
-     */
-    public function setClient($client)
-    {
-        Request::setClient($client);
     }
 }

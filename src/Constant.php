@@ -1,6 +1,6 @@
-<?php declare(strict_types=1);
+<?php declare (strict_types=1);
 
-namespace AmazonMws;
+namespace AmazonMWS;
 
 class Constant
 {
@@ -22,5 +22,5 @@ class Constant
     /**
      * @var const
      */
-    public const APPLICATION_NAME = 'AmazonMws/Client';
+    public const APPLICATION_NAME = 'AmazonMWS/Client';
 }

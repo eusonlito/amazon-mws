@@ -1,6 +1,6 @@
-<?php declare(strict_types=1);
+<?php declare (strict_types = 1);
 
-namespace AmazonMws;
+namespace AmazonMWS;
 
 use Exception;
 
@@ -15,7 +15,7 @@ class Config
         'Access_Key_ID' => null,
         'Secret_Access_Key' => null,
         'MWSAuthToken' => null,
-        'Application_Version' => '0.0.*',
+        'Application_Version' => '0.0.1',
     ];
 
     /**
@@ -44,11 +44,11 @@ class Config
         'Marketplace_Id',
         'Seller_Id',
         'Access_Key_ID',
-        'Secret_Access_Key'
+        'Secret_Access_Key',
     ];
 
     /**
-     * @param array
+     * @param array $config
      *
      * @return void
      */
