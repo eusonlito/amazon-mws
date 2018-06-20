@@ -1,10 +1,10 @@
 <?php declare (strict_types = 1);
 
-namespace MCS;
+namespace AmazonMws;
 
 use Exception;
 
-class MWSEndPoint
+class EndPoint
 {
     protected static $endpoints = [
         'ListRecommendations' => [
