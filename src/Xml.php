@@ -3,6 +3,7 @@
 namespace AmazonMWS;
 
 use DOMDocument;
+use DOMNode;
 
 class Xml
 {
@@ -31,17 +32,22 @@ class Xml
     }
 
     /**
-     * @param \DOMDocument &$root
+     * @param \DOMNode $root
      * @param array $array
-     * @param \DOMDocument &$dom
+     * @param \DOMDocument $dom
      *
      * @return void
      */
-    private static function toStringRecursive(&$root, $array, &$dom): void
+    private static function toStringRecursive(DOMNode $root, array $array, DOMDocument $dom): void
     {
         foreach ($array as $key => $item) {
             $isArray = is_array($item);
             $isNumeric = is_numeric($key);
+
+            if ($isArray && isset($item['_value']) && isset($item['_attributes'])) {
+                static::domWithAttributes($root, $key, $item, $dom);
+                continue;
+            }
 
             if ($isArray && $isNumeric) {
                 static::toStringRecursive($root, $item, $dom);
@@ -49,15 +55,60 @@ class Xml
             }
 
             if (($isArray === false) || $isNumeric) {
-                $root->appendChild($dom->createElement($key, (string)$item));
+                static::domChild($root, $key, $item, $dom);
                 continue;
             }
 
-            $node = $dom->createElement($key);
-
-            static::toStringRecursive($node, $item, $dom);
-
-            $root->appendChild($node);
+            static::domNodes($root, $key, $item, $dom);
         }
+    }
+
+    /**
+     * @param \DOMNode $root
+     * @param string $key
+     * @param array $item
+     * @param \DOMDocument $dom
+     *
+     * @return void
+     */
+    private static function domWithAttributes(DOMNode $root, string $key, array $item, DOMDocument $dom): void
+    {
+        $node = $dom->createElement($key, $item['_value']);
+
+        foreach ($item['_attributes'] as $key => $value) {
+            $node->setAttribute($key, $value);
+        }
+
+        $root->appendChild($node);
+    }
+
+    /**
+     * @param \DOMNode $root
+     * @param string $key
+     * @param mixed $item
+     * @param \DOMDocument $dom
+     *
+     * @return void
+     */
+    private static function domChild(DOMNode $root, string $key, $item, DOMDocument $dom): void
+    {
+        $root->appendChild($dom->createElement($key, (string)$item));
+    }
+
+    /**
+     * @param \DOMNode $root
+     * @param string $key
+     * @param array $item
+     * @param \DOMDocument $dom
+     *
+     * @return void
+     */
+    private static function domNodes(DOMNode $root, string $key, array $item, DOMDocument $dom): void
+    {
+        $node = $dom->createElement($key);
+
+        static::toStringRecursive($node, $item, $dom);
+
+        $root->appendChild($node);
     }
 }
