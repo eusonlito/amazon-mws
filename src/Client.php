@@ -748,19 +748,19 @@ class Client
      * Dates in DateTime object
      * Price has to be formatted as XSD Numeric Data Type (http://www.w3schools.com/xml/schema_dtypes_numeric.asp)
      *
-     * @param array $standardprice an array containing sku as key and price as value
-     * @param array $salesprice an optional array with sku as key and value consisting of an array with key/value pairs for SalePrice, StartDate, EndDate
+     * @param array $StandardPrice an array containing sku as key and price as value
+     * @param array $SalePrice an optional array with sku as key and value consisting of an array with key/value pairs for SalePrice, StartDate, EndDate
      *
      * @return array feed submission result
      */
-    public function updatePrice(array $standardprice, array $saleprice = []): array
+    public function updatePrice(array $StandardPrice, array $SalePrice = []): array
     {
         $feed = [
             'MessageType' => 'Price',
             'Message' => [],
         ];
 
-        foreach ($standardprice as $sku => $price) {
+        foreach ($StandardPrice as $sku => $price) {
             $feed['Message'][] = [
                 'MessageID' => rand(),
                 'Price' => [
@@ -774,7 +774,7 @@ class Client
                 ],
             ];
 
-            $price = $saleprice[$sku] ?? null;
+            $price = $SalePrice[$sku] ?? null;
 
             if (!is_array($price)) {
                 continue;
@@ -881,7 +881,7 @@ class Client
     public function SubmitFeed(string $FeedType, $feedContent, bool $debug = false, array $options = []): array
     {
         if (is_array($feedContent)) {
-            $feedContent = Xml::toXml(array_merge([
+            $feedContent = Xml::toString(array_merge([
                 'Header' => [
                     'DocumentVersion' => 1.01,
                     'MerchantIdentifier' => Config::get('Seller_Id'),

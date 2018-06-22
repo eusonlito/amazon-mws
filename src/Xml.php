@@ -49,7 +49,7 @@ class Xml
             }
 
             if (($isArray === false) || $isNumeric) {
-                $root->appendChild($dom->createElement($key, $item));
+                $root->appendChild($dom->createElement($key, (string)$item));
                 continue;
             }
 

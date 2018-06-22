@@ -55,12 +55,6 @@ class Curl
         $this->setOption(CURLOPT_MAXREDIRS, 5);
         $this->setOption(CURLOPT_FOLLOWLOCATION, true);
         $this->setOption(CURLOPT_COOKIESESSION, false);
-
-        $this->setHeaders([
-            'User-Agent: '.$this->userAgent,
-            'Connection: keep-alive',
-            'Cache-Control: max-age=0',
-        ]);
     }
 
     /**
@@ -95,6 +89,12 @@ class Curl
      */
     public function setHeaders(array $headers): self
     {
+        if (array_key_exists(0, $headers) === false) {
+            $headers = array_map(function ($key, $value) {
+                return $key.': '.$value;
+            }, array_keys($headers), $headers);
+        }
+
         $this->setOption(CURLOPT_HTTPHEADER, $headers);
 
         return $this;
@@ -117,7 +117,7 @@ class Curl
      *
      * @return self
      */
-    public function setBody( ? string $body) : self
+    public function setBody(?string $body) : self
     {
         $this->body = $body;
 
@@ -129,7 +129,7 @@ class Curl
      *
      * @return self
      */
-    public function setQuery( ? array $query) : self
+    public function setQuery(?array $query) : self
     {
         $this->query = $query;
 
@@ -190,7 +190,13 @@ class Curl
     protected function execPOST(): self
     {
         $this->setOption(CURLOPT_POST, true);
-        $this->setOption(CURLOPT_POSTFIELDS, $this->buildQuery());
+
+        if ($this->body) {
+            $this->setOption(CURLOPT_POSTFIELDS, $this->body);
+            $this->url .= '?'.$this->buildQuery();
+        } else {
+            $this->setOption(CURLOPT_POSTFIELDS, $this->buildQuery());
+        }
 
         return $this;
     }
